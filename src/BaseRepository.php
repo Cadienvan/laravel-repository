@@ -47,14 +47,14 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Criteria to keep and use for all coming queries
      *
-     * @var Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @var Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     protected Collection $criteria;
 
     /**
      * The Criteria to only apply to the next query
      *
-     * @var Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @var Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     protected Collection $onceCriteria;
 
@@ -63,7 +63,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * So this is a dynamic list that can change during calls of various repository
      * methods that alter the active criteria.
      *
-     * @var Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @var Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     protected Collection $activeCriteria;
 
@@ -84,7 +84,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     /**
      * @param ContainerInterface                                       $container
-     * @param Collection<int|string, CriteriaInterface<TModel, Model>> $initialCriteria
+     * @param Collection<mixed, CriteriaInterface<TModel, Model>> $initialCriteria
      * @throws RepositoryException
      */
     public function __construct(ContainerInterface $container, Collection $initialCriteria)
@@ -121,7 +121,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         try {
             $model = $this->app->get($this->model());
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $exception) {
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $exception) {
             throw new RepositoryException(
                 "Class {$this->model()} could not be instantiated through the container",
                 $exception->getCode(),
@@ -129,7 +129,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
             );
         }
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new RepositoryException(
                 "Class {$this->model()} must be an instance of Illuminate\\Database\\Eloquent\\Model"
             );
@@ -187,7 +187,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         $result = $this->query()->first($columns);
 
-        if (! empty($result)) {
+        if (!empty($result)) {
             return $result;
         }
 
@@ -206,7 +206,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * @param string      $value
      * @param string|null $key
-     * @return Collection<int|string, mixed>
+     * @return Collection<mixed, mixed>
      * @throws RepositoryException
      */
     public function pluck(string $value, ?string $key = null): Collection
@@ -236,12 +236,12 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
 
     /**
-     * @param int|string  $id
+     * @param mixed  $id
      * @param string[]    $columns
      * @param string|null $attribute
      * @return TModel|null
      */
-    public function find(int|string $id, array $columns = ['*'], ?string $attribute = null): ?Model
+    public function find(mixed $id, array $columns = ['*'], ?string $attribute = null): ?Model
     {
         $query = $this->query();
 
@@ -253,16 +253,16 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
 
     /**
-     * @param int|string $id
+     * @param mixed $id
      * @param string[]   $columns
      * @return TModel
      * @throws ModelNotFoundException
      */
-    public function findOrFail(int|string $id, array $columns = ['*']): Model
+    public function findOrFail(mixed $id, array $columns = ['*']): Model
     {
         $result = $this->query()->find($id, $columns);
 
-        if (! empty($result)) {
+        if (!empty($result)) {
             return $result;
         }
 
@@ -310,25 +310,25 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
         foreach ($where as $field => $value) {
             if ($value instanceof Closure) {
-                $model = (! $or)
+                $model = (!$or)
                     ? $model->where($value)
                     : $model->orWhere($value);
             } elseif (is_array($value)) {
                 if (count($value) === 3) {
                     [$field, $operator, $search] = $value;
 
-                    $model = (! $or)
+                    $model = (!$or)
                         ? $model->where($field, $operator, $search)
                         : $model->orWhere($field, $operator, $search);
                 } elseif (count($value) === 2) {
                     [$field, $search] = $value;
 
-                    $model = (! $or)
+                    $model = (!$or)
                         ? $model->where($field, $search)
                         : $model->orWhere($field, $search);
                 }
             } else {
-                $model = (! $or)
+                $model = (!$or)
                     ? $model->where($field, $value)
                     : $model->orWhere($field, $value);
             }
@@ -368,15 +368,15 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     /**
      * @param array<string, mixed> $data
-     * @param int|string           $id
+     * @param mixed           $id
      * @param string|null          $attribute
      * @return bool
      */
-    public function update(array $data, int|string $id, ?string $attribute = null): bool
+    public function update(array $data, mixed $id, ?string $attribute = null): bool
     {
         $model = $this->find($id, ['*'], $attribute);
 
-        if (! $model) {
+        if (!$model) {
             return false;
         }
 
@@ -387,16 +387,16 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Finds and fills a model by id, without persisting changes.
      *
      * @param array<string, mixed> $data
-     * @param int|string           $id
+     * @param mixed           $id
      * @param string|null          $attribute
      * @return TModel|false
      * @throws MassAssignmentException|ModelNotFoundException
      */
-    public function fill(array $data, int|string $id, ?string $attribute = null): Model|false
+    public function fill(array $data, mixed $id, ?string $attribute = null): Model|false
     {
         $model = $this->find($id, ['*'], $attribute);
 
-        if (! $model) {
+        if (!$model) {
             throw (new ModelNotFoundException())->setModel($this->model());
         }
 
@@ -404,11 +404,11 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
 
     /**
-     * @param int|string $id
+     * @param mixed $id
      * @return int
      * @throws RepositoryException
      */
-    public function delete(int|string $id): int
+    public function delete(mixed $id): int
     {
         return $this->makeModel(false)->destroy($id);
     }
@@ -472,7 +472,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Override with your own defaults (check ExtendedRepository's refreshed,
      * named Criteria for examples).
      *
-     * @return Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @return Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     public function defaultCriteria(): Collection
     {
@@ -507,7 +507,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Returns a cloned set of all currently set criteria (not including
      * those to be applied once).
      *
-     * @return Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @return Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     public function getCriteria(): Collection
     {
@@ -517,7 +517,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Returns a cloned set of all currently set once criteria.
      *
-     * @return Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @return Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     public function getOnceCriteria(): Collection
     {
@@ -527,7 +527,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Returns a cloned set of all currently set criteria (not including those to be applied once).
      *
-     * @return Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @return Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     public function getAllCriteria(): Collection
     {
@@ -547,7 +547,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         // If we're ignoring criteria, the model must be remade without criteria ...
         if ($this->ignoreCriteria === true) {
             // ... and make sure that they are re-applied when we stop ignoring.
-            if (! $this->activeCriteria->isEmpty()) {
+            if (!$this->activeCriteria->isEmpty()) {
                 $this->makeModel();
                 $this->activeCriteria = new Collection();
             }
@@ -634,7 +634,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function removeCriteriaOnce(string $key): static
     {
         // If not present in normal list, there is nothing to override.
-        if (! $this->criteria->has($key)) {
+        if (!$this->criteria->has($key)) {
             return $this;
         }
 
@@ -651,7 +651,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Returns the criteria that must be applied for the next query.
      *
-     * @return Collection<int|string, CriteriaInterface<TModel, Model>>
+     * @return Collection<mixed, CriteriaInterface<TModel, Model>>
      */
     protected function getCriteriaToApply(): Collection
     {
@@ -659,7 +659,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         $criteriaToApply = $this->getCriteria();
 
         // overrule them with criteria to be applied once
-        if (! $this->onceCriteria->isEmpty()) {
+        if (!$this->onceCriteria->isEmpty()) {
             foreach ($this->onceCriteria as $onceKey => $onceCriteria) {
                 // If there is no key, we can only add the criteria.
                 if (is_numeric($onceKey)) {
@@ -716,13 +716,13 @@ abstract class BaseRepository implements BaseRepositoryInterface
     protected function assertValidCustomCallback(mixed $result): void
     {
         if (
-            ! $result instanceof Model
-            && ! $result instanceof EloquentBuilder
-            && ! $result instanceof BaseBuilder
+            !$result instanceof Model
+            && !$result instanceof EloquentBuilder
+            && !$result instanceof BaseBuilder
         ) {
             throw new InvalidArgumentException(
                 'Incorrect allCustom call in repository. '
-                . 'The callback must return a QueryBuilder/EloquentBuilder or Model object.'
+                    . 'The callback must return a QueryBuilder/EloquentBuilder or Model object.'
             );
         }
     }
